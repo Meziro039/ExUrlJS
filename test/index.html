@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="../src/address.js"></script>
+    <input id="text" type="text" oninput="up()" value="http://user:pass@domain.com:80/path/path2?que=ry&que2=ry#hash">
+</head>
+<body>
+    <script>
+        function up () {
+            Url.Parse(document.getElementById("text").value)
+        }
+    </script>
+</body>
+</html>
