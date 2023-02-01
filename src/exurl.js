@@ -2,7 +2,7 @@
 License: MIT License
 Copyright: Meziro(https://github.com/Meziro039/UrlJS)
 
-Version:0.0.1β
+Version:0.0.2β
 */
 
 class EXURL {
