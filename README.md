@@ -28,6 +28,7 @@ ExUrl.Parse("http://user:pass@example.com:80/path?query=value#hash");
 `ExUrl.SetQuery`: クエリを設定する
 `ExUrl.DeleteQuery`: クエリを削除する
 `ExUrl.SetHistory`: ヒストリを設定する
+`ExUrl.FullPathConv`: 絶対バスに変換する(//example.com/...)
 -->
 
 ## 更新履歴
@@ -36,3 +37,6 @@ Release: 2023/01/31
 
 ### Ver0.0.1β
 Release: 2023/02/01
+
+### Ver0.0.2β
+Release: 2023/02/02

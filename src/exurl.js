@@ -13,115 +13,92 @@ class EXURL {
             return null;
         };
 
-        let Var_Protocol = "";
-        let Var_FullHost = "";
-        let Var_UserName = "";
-        let Var_Password = "";
-        let Var_HostPort = "";
-        let Var_Host = "";
-        let Var_Port = "";
-        let Var_Path = "";
-        let Var_Query = {};
-        let Var_Hash = "";
-
-        // To array.
-        Var_Url = Var_Url.split("/");
-        for (let i = 0;i < Var_Url.length;i++) {
-            if (Var_Url[i] === "") {
-                Var_Url.splice(i, 1);
-            };
-        };
-
         // Protocol or FullHost
-        Var_Protocol = Var_Url[0].match(/^[^:\/@]+:$/);
-        Var_FullHost = Var_Url[0].match(/^((([^\/@]+:|)[^\/:@]+@|[^\/:@]*)[^\/:@]+\.[^\/:@]+([^\/:@]*|:\d+)|localhost)$/); // /^[^\/]+\.([^:\/@\.]+|[^:\/@\.]+:\d)$/
+        let Var_Protocol = Var_Url.match(/^[^\/:@\[\]]+:\/{2,3}/);
+        let Var_FullHost = Var_Url.match(/^([^\/:@\[\]]+:|)([^\/:@\[\]]+@|)([^\/@\[\]]+\.[^\/:@\[\]]+|\[[^\.\/@\[\]]+\]|localhost)(:\d+|)/); // ^([^\/:@\[\]]+:|)([^\/:@\[\]]+@|)([^\/@]+\.[^\/:@]+|localhost)(:\d+|)
         if (Var_Protocol) {
             Var_Protocol = Var_Protocol[0];
-            Var_Url.shift();
+            Var_Url = Var_Url.replace(/^[^\/:@\[\]]+:\/{2,3}/, "");
         } else if (Var_FullHost) {
+            Var_Protocol = "";
             Var_FullHost = Var_FullHost[0];
-            Var_Url.shift();
-        };
-
-        // FullHost or Not url
-        if (Var_FullHost === null) {
-            Var_FullHost = Var_Url[0].match(/^((([^\/@]+:|)[^\/:@]+@|[^\/:@]*)[^\/:@]+\.[^\/:@]+([^\/:@]*|:\d+)|localhost)$/);
-            if (Var_FullHost) {
-                Var_FullHost = Var_FullHost[0];
-                Var_Url.shift();
-            } else {
-                // ERROR
-                console.error("ERROR: Input is not url.");
-                return null;
-            }
-        };
-
-        // FullHost split
-        const BasicCheck = Var_FullHost.split("@");
-        if (BasicCheck.length === 1) {
-            // No Basic
-        } else if (BasicCheck.length === 2) {
-            // Yes Basic
-            BasicCheck[0] = BasicCheck[0].split(":");
-            if (BasicCheck[0].length === 2) {
-                Var_UserName = BasicCheck[0][0];
-                Var_Password = BasicCheck[0][1];
-            } else {
-                Var_Password = BasicCheck[0][0];
-            }
-            BasicCheck[0] = BasicCheck[1];
+            Var_Url = Var_Url.replace(/^([^\/:@\[\]]+:|)([^\/:@\[\]]+@|)([^\/@\[\]]+\.[^\/:@\[\]]+|\[[^\.\/@\[\]]+\]|localhost)(:\d+|)/, "");
         } else {
-            // Not Url
             // ERROR
-            console.error("ERROR: Input is not url.");
             return null;
         };
-        const HostSplit = BasicCheck[0].split(":");
-        Var_HostPort = BasicCheck[0];
-        if (HostSplit.length === 2) {
-            Var_Host = HostSplit[0];
-            Var_Port = HostSplit.slice(-1)[0];
+
+        // FullHost or Path
+        if (Var_FullHost == null) {
+            Var_FullHost = Var_Url.match(/^([^\/:@\[\]]+:|)([^\/:@\[\]]+@|)([^\/@\[\]]+\.[^\/:@\[\]]+|\[[^\.\/@\[\]]+\]|localhost)(:\d+|)/);
+            console.log(Var_FullHost[0]);
+            if (Var_FullHost) {
+                Var_FullHost = Var_FullHost[0];
+                Var_Url = Var_Url.replace(/^([^\/:@\[\]]+:|)([^\/:@\[\]]+@|)([^\/@\[\]]+\.[^\/:@\[\]]+|\[[^\.\/@\[\]]+\]|localhost)(:\d+|)/, "");
+            } else {
+                // ERROR
+                return null;
+            };
+        };
+
+        // FullHost split.
+        let Var_UserName = Var_FullHost.match(/^[^\/:@\[\]]+:/);
+        let Var_Password = Var_FullHost.match(/(:|^)[^\/:@\[\]]+@/);
+        let Var_Host = Var_FullHost.match(/(\/|@|^)([^\/@\[\]]+\.[^\/:@\[\]]+|\[[^\.\/@\[\]]+\]|localhost)(:|$)/);
+        let Var_Port = Var_FullHost.match(/:\d+$/);
+        if (Var_UserName) {
+            Var_UserName = Var_UserName[0];
         } else {
-            Var_Host = HostSplit[0];
-        };
-        // IPv6入れたら壊れるなこれ
+            Var_UserName = "";
+        }
+        if (Var_Password) {
+            Var_Password = Var_Password[0];
+        } else {
+            Var_Password = "";
+        }
+        if (Var_Host) {
+            Var_Host = Var_Host[0];
+        } else {
+            Var_Host = "";
+        }
+        if (Var_Port) {
+            Var_Port = Var_Port[0];
+        } else {
+            Var_Port = "";
+        }
 
-        // Path or Query or Hash
-        let Var_PathCheck;
-        let Var_QueryCheck;
-        let Var_HashCheck;
-        for (let i = 0;i < Var_Url.length;i++) {
-            Var_PathCheck = Var_Url[i].match(/^[^\?#]+/);
-            if (Var_PathCheck) {
-                Var_Path += "/" + Var_PathCheck[0];
-                Var_Url[i] = Var_Url[i].replace(Var_PathCheck[0], "");
-            };
-            if (Var_Url[i].length !== 0) {
-                if (Var_Url[i].match(/^(\?|#)/)) {
-                    Var_Url = Var_Url.join("");
-                    Var_HashCheck = Var_Url.match(/#.+$/);
-                    if (Var_HashCheck) {
-                        Var_Hash = Var_HashCheck[0];
-                        Var_Url = Var_Url.replace(/#.+$/, "");
+        let Var_Path = Var_Url.match(/^\/[^\?#]*/);
+        let Var_Query = Var_Url.match(/\?[^#]*/);
+        let Var_Hash = Var_Url.match(/#.*$/);
+        if (Var_Path) {
+            Var_Path = Var_Path[0];
+            if (Var_Query) {
+                const QuerySplit = Var_Query[0].replace(/^\?/, "").split("&");
+                Var_Query = {};
+                for (let i = 0;i < QuerySplit.length;i++) {
+                    let QueryValue = QuerySplit[i].split("=");
+                    const Query = QueryValue[0];
+                    QueryValue.splice(0, 1);
+                    let Value = QueryValue.join("");
+                    if (typeof Value === "undefined") {
+                        Value = "";
                     };
-                    Var_QueryCheck = Var_Url.match(/^\?.+$/);
-                    if (Var_QueryCheck) {
-                        Var_QueryCheck = Var_QueryCheck[0].replace(/^\?/, "").split("&");
-                        for (let j = 0;j < Var_QueryCheck.length;j++) {
-                            const Query = Var_QueryCheck[j].split("=")[0];
-                            let Value = Var_QueryCheck[j].split("=")[1];
-                            if (typeof Value === "undefined") {
-                                Value = "";
-                            };
-                            Var_Query[Query] = Value;
-                        };
-                        break;
-                    };
+                    Var_Query[Query] = Value;
                 };
-            };
+            } else {
+                Var_Query = "";
+            }
+            if (Var_Hash) {
+                Var_Hash = Var_Hash[0];
+            } else {
+                Var_Hash = "";
+            }
+        } else {
+            // Skip
+            Var_Path = "";
         };
 
-        /* Debug
+        //*Debug
         console.log(
             "START:\n" +
             "Protocol: " + Var_Protocol + "\n" +
@@ -133,7 +110,7 @@ class EXURL {
             "Path: " + Var_Path + "\n" +
             "Query: " + JSON.stringify(Var_Query) + "\n" +
             "Hash: " + Var_Hash + "\n" +
-            "HostPort: " + Var_HostPort + "\n" +
+            //"HostPort: " + Var_HostPort + "\n" +
             "END:"
         );
         //*/
@@ -147,8 +124,8 @@ class EXURL {
             "Path" : Var_Path,
             "Query" : Var_Query,
             "Hash" : Var_Hash,
-            "HostPort" : Var_HostPort
+            //"HostPort" : Var_HostPort
         };
-    }
+    };
 }
 const ExUrl = new EXURL;
